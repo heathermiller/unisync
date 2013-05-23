@@ -1,4 +1,4 @@
-## uniSync is a super simple uni-dimensional sync (written in Scala)
+## uniSync is a super simple uni-directional sync <br>(written in Scala)
 
 Why I needed uniSync:
 

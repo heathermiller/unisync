@@ -1,17 +1,17 @@
 #!/bin/sh
 SCRIPT="$(cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}")"
 DIR=`dirname "${SCRIPT}"}`
-exec scala $0 $DIR $SCRIPT $@
+exec scala -cp $DIR/commons-io-2.4.jar $0 $DIR $SCRIPT $@
 ::!#
 
 /** Usage:
   *  uniSync /path/to/srcDir /path/to/destDir
-  *
   */
 
 import java.io.{File => JFile}
 import java.io.{FileWriter, PrintWriter}
 import scala.io.Source
+import org.apache.commons.io._
 
 object App {
   def main(args: Array[String]): Unit = {
@@ -35,19 +35,35 @@ object App {
     val previousFileList = Source.fromFile(dotUnisync.getAbsolutePath).getLines.toList
     val currentFileList = mkFileList(sourceDir)
 
-    val deletedFiles = previousFileList filter { prevFile =>
+
+    // delete files in destination that have been deleted at the source
+    val deletedFilesAtSrc = previousFileList filter { prevFile =>
       !currentFileList.exists(file => file.getAbsolutePath == prevFile)
     }
 
-    if (deletedFiles.isEmpty) println("No files have been removed since last run.")
-    else {
-      println(deletedFiles.length + " files removed from source directory. Removing the following files from destination directory...")
-      deletedFiles foreach { fileName =>
-        val corrsep = findCorrespondingInDestDir(sourceDir, destDir, new JFile(fileName))
-        println(corrsep.getAbsolutePath)
-      }
+    val filesToDeleteAtDest = deletedFilesAtSrc map { fileName =>
+      findCorrespondingInDestDir(sourceDir, destDir, new JFile(fileName))
     }
 
+    if (deletedFilesAtSrc.isEmpty) println("No files have been removed since last run.")
+    else {
+      println(deletedFilesAtSrc.length + " files removed from source directory. Removing the following corresponding files from destination directory...")
+      filesToDeleteAtDest foreach println
+    }
+
+    if (!filesToDeleteAtDest.isEmpty) {
+      print("\nDeleting... ")
+      filesToDeleteAtDest foreach (file => FileUtils.deleteQuietly(file))
+      print("DONE.")
+    }
+
+    //   deletedFilesAtSrc foreach { fileName =>
+    //     val corrsep = findCorrespondingInDestDir(sourceDir, destDir, new JFile(fileName))
+    //     println(corrsep.getAbsolutePath)
+    //   }
+
+
+    // val yay = FileUtils.isSymlink(dotUnisync)
 
 
     println("\n\nPreviously:")

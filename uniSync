@@ -52,29 +52,33 @@ object App {
     }
 
     if (!filesToDeleteAtDest.isEmpty) {
-      print("\nDeleting... ")
+      print("Deleting... ")
       filesToDeleteAtDest foreach (file => FileUtils.deleteQuietly(file))
       print("DONE.")
     }
 
-    //   deletedFilesAtSrc foreach { fileName =>
-    //     val corrsep = findCorrespondingInDestDir(sourceDir, destDir, new JFile(fileName))
-    //     println(corrsep.getAbsolutePath)
-    //   }
+
+    // copy all files from source to destination
+    print("\nCopying to " + destDir + "... ")
+    currentFileList foreach { file =>
+      FileUtils.copyFile(file, findCorrespondingInDestDir(sourceDir, destDir, file))
+    }
+    print("DONE.")
+
+    // update .unisync file with what's now in the source directory
+    print("\nUpdating .unisync... ")
+    writeUnisyncFile(currentFileList.toList, dotUnisync)
+    print("DONE.\n")
+
+    // print summary
+    println("Summary: copied " + currentFileList.length + " files, deleted " + deletedFilesAtSrc.length + " files.")
 
 
-    // val yay = FileUtils.isSymlink(dotUnisync)
+    // println("\n\nPreviously:")
+    // previousFileList foreach println
 
-
-    println("\n\nPreviously:")
-    previousFileList foreach println
-
-    println("\n\nCurrently:")
-    currentFileList foreach println
-
-
-    // findCorrespondingInDestDir(sourceDir, destDir, new JFile("/Users/hmiller/Desktop/test/a/2.scala")).getAbsolutePath
-
+    // println("\n\nCurrently:")
+    // currentFileList foreach println
   }
 
   def findCorrespondingInDestDir(sourceDir: JFile, destDir: JFile, file: JFile): JFile = {
@@ -86,10 +90,14 @@ object App {
   def initialize(sourceDir: JFile, dotUnisync: JFile) = {
     check(sourceDir)
     val fileList = mkFileList(sourceDir)
+    writeUnisyncFile(fileList.toList, dotUnisync)
+  }
+
+  def writeUnisyncFile(files: List[JFile], dotUnisync: JFile) = {
     val writer = new PrintWriter(new FileWriter(dotUnisync))
 
     // output file list to newly-created .unisync file
-    fileList foreach (file => writer.println(file.getAbsolutePath))
+    files foreach (file => writer.println(file.getAbsolutePath))
     writer.close
   }
 
@@ -110,39 +118,3 @@ object App {
 
   def check(file: JFile): Unit = if (!file.exists) sys.error("Provided path to directory, "+file.getAbsolutePath+" doesn't exist")
 }
-
-
-// class DirectoryCloner(dir: String) {
-
-//   val root = new JFile(dir)
-//   check(root)
-
-//   println("this is the dir: "+dir)
-
-//   private val scratchIgnore = new JFile(dir+"/.scratchignore")
-//   var ignore: List[String] = if (scratchIgnore.exists) makeIgnoreList(scratchIgnore) else List()
-//   ignore = ".scratchignore" :: "_site" :: ignore
-
-//   val siteDir = new JFile(dir+"/_site")
-//   if (!siteDir.exists) siteDir.mkdir()
-
-//   def cloneDir(file: JFile = root, offset: String = ""): Unit = {
-//     val children = file.listFiles
-//     println(children.mkString("\n"))
-//     val okChildren = children.filterNot(f => ignore.contains(f.getName)) //FIXME: need to be able to list files and extensions
-//     println("filtered children:")
-//     println(okChildren.mkString("\n"))
-
-//     okChildren.foreach{c =>
-//       val f = new JFile(dir+"/_site"+offset+"/"+c.getName)
-//       f.mkdir()
-//       val newOffset = offset+"/"+c.getName
-//       cloneDir(c, newOffset)
-//     }
-//   }
-
-//   def check(file: JFile): Unit = if (!file.exists) sys.error("Provided path to directory, "+file.getAbsolutePath+" doesn't exist")
-//   def makeIgnoreList(file: JFile): List[String] = Source.fromFile(file).getLines.toList
-
-//   //def traverse(dir: Directory): Unit = { /* do nothing for now */ }
-// }

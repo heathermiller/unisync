@@ -1,0 +1,79 @@
+#!/bin/sh
+SCRIPT="$(cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}")"
+DIR=`dirname "${SCRIPT}"}`
+exec scala $0 $DIR $SCRIPT $@
+::!#
+
+/** Usage:
+  *  uniSync /path/to/srcDir /path/to/destDir
+  *
+  */
+
+import java.io.{File => JFile}
+import scala.io.Source
+
+object App {
+  def main(args: Array[String]): Unit = {
+    val files = args.map(new JFile(_))
+    val sourceDir = files(2)
+    val destDir = files(3)
+    println("Running uniSync with source dir: %s, and destination dir: %s.".format(sourceDir, destDir))
+
+    check(sourceDir)
+    val fileList = mkFileList(sourceDir)
+    fileList foreach println
+  }
+
+  /** Lists all the files contained in `dir` and, recursively, the children of `dir`.
+    * Note that this contains only files, and not directories.
+    */
+  def mkFileList(dir: JFile): Array[JFile] = {
+      val children = if (dir.isDirectory) {
+        dir.listFiles
+      } else Array[JFile]()
+
+      val fileList =
+        if (dir.isDirectory) children.flatMap(child => mkFileList(child))
+        else Array(dir)
+
+      fileList
+  }
+
+  def check(file: JFile): Unit = if (!file.exists) sys.error("Provided path to directory, "+file.getAbsolutePath+" doesn't exist")
+}
+
+
+// class DirectoryCloner(dir: String) {
+
+//   val root = new JFile(dir)
+//   check(root)
+
+//   println("this is the dir: "+dir)
+
+//   private val scratchIgnore = new JFile(dir+"/.scratchignore")
+//   var ignore: List[String] = if (scratchIgnore.exists) makeIgnoreList(scratchIgnore) else List()
+//   ignore = ".scratchignore" :: "_site" :: ignore
+
+//   val siteDir = new JFile(dir+"/_site")
+//   if (!siteDir.exists) siteDir.mkdir()
+
+//   def cloneDir(file: JFile = root, offset: String = ""): Unit = {
+//     val children = file.listFiles
+//     println(children.mkString("\n"))
+//     val okChildren = children.filterNot(f => ignore.contains(f.getName)) //FIXME: need to be able to list files and extensions
+//     println("filtered children:")
+//     println(okChildren.mkString("\n"))
+
+//     okChildren.foreach{c =>
+//       val f = new JFile(dir+"/_site"+offset+"/"+c.getName)
+//       f.mkdir()
+//       val newOffset = offset+"/"+c.getName
+//       cloneDir(c, newOffset)
+//     }
+//   }
+
+//   def check(file: JFile): Unit = if (!file.exists) sys.error("Provided path to directory, "+file.getAbsolutePath+" doesn't exist")
+//   def makeIgnoreList(file: JFile): List[String] = Source.fromFile(file).getLines.toList
+
+//   //def traverse(dir: Directory): Unit = { /* do nothing for now */ }
+// }

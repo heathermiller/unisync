@@ -54,13 +54,13 @@ Let's say we delete stuff in `A`, like: `2.scala` and `3.scala`. Running `uniSyn
 
 ## You want to use it?
 
-Great. All you need is Java (1.6). Just [download the two jars](), unarchive them to a nice directory somewhere that's on your path, `chmod +x` your stuff, and that's it.
+Great. All you need is Java (1.6). Just [download the three jars](https://github.com/heathermiller/unisync/blob/master/unisync.zip?raw=true), unarchive them to a nice directory somewhere that's on your path, `chmod +x` your stuff, and that's it.
 
 **Always call uniSync from the same directory**. Why? It writes a hidden file, called `.unisync` to the directory you called uniSync from. This file keeps track of what the state of your directory was the last time you called uniSync. It's used to figure out how your directory has changed since the last time you called uniSync (and what files you might've deleted).
 
 **Example setup:**
 
-For example, you might want to unarchive [the bundle]() to `~/bin` on your web server. Then, make sure that unisync is executable: `chmod +x unisync`.
+For example, you might want to unarchive [the bundle](https://github.com/heathermiller/unisync/blob/master/unisync.zip?raw=true) to `~/bin` on your web server. Then, make sure that unisync is executable: `chmod +x unisync`.
 
 **Example usage:**
 
@@ -99,5 +99,5 @@ After:
 Great. Just make a PR.
 
 And of course: Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
+is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.

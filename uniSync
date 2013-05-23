@@ -1,5 +1,5 @@
 #!/bin/sh
 SCRIPT="$(cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}")"
 DIR=`dirname "${SCRIPT}"}`
-exec java -cp $DIR/commons-io-2.4.jar:$DIR/scala-library.jar:$DIR/uniSync.jar Main $DIR $0 $@
+exec java -XX:MaxHeapSize=256m -cp $DIR/commons-io-2.4.jar:$DIR/scala-library.jar:$DIR/uniSync.jar Main $DIR $0 $@
 

@@ -53,7 +53,11 @@ object App {
 
     if (!filesToDeleteAtDest.isEmpty) {
       print("Deleting... ")
-      filesToDeleteAtDest foreach (file => FileUtils.deleteQuietly(file))
+      filesToDeleteAtDest foreach {
+        file => FileUtils.deleteQuietly(file)
+        val parentDir = file.getParentFile
+        if(parentDir.list().length == 0) FileUtils.deleteQuietly(parentDir) // that means the parent directory is empty
+      }
       print("DONE.")
     }
 
@@ -72,7 +76,6 @@ object App {
 
     // print summary
     println("Summary: copied " + currentFileList.length + " files, deleted " + deletedFilesAtSrc.length + " files.")
-
 
     // println("\n\nPreviously:")
     // previousFileList foreach println

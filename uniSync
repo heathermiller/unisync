@@ -10,18 +10,71 @@ exec scala $0 $DIR $SCRIPT $@
   */
 
 import java.io.{File => JFile}
+import java.io.{FileWriter, PrintWriter}
 import scala.io.Source
 
 object App {
   def main(args: Array[String]): Unit = {
+
     val files = args.map(new JFile(_))
+    val currentDir = files(0)
     val sourceDir = files(2)
     val destDir = files(3)
-    println("Running uniSync with source dir: %s, and destination dir: %s.".format(sourceDir, destDir))
 
+    println("You called uniSync inside of directory: " + currentDir)
+    val dotUnisync = new JFile(currentDir, ".unisync");
+    if (!dotUnisync.exists) {
+      println("Creating a new .unisync file in current directory...")
+      initialize(sourceDir, dotUnisync)
+      println("uniSync initialized. Run uniSync again to actually do your uni-directional sync.")
+      return
+    } else println("Reusing .unisync file in current directory...")
+    println("Running uniSync with source dir: %s, and destination dir: %s.\n".format(sourceDir, destDir))
+
+    // figure out the difference between the last run of uniSync and the current run
+    val previousFileList = Source.fromFile(dotUnisync.getAbsolutePath).getLines.toList
+    val currentFileList = mkFileList(sourceDir)
+
+    val deletedFiles = previousFileList filter { prevFile =>
+      !currentFileList.exists(file => file.getAbsolutePath == prevFile)
+    }
+
+    if (deletedFiles.isEmpty) println("No files have been removed since last run.")
+    else {
+      println(deletedFiles.length + " files removed from source directory. Removing the following files from destination directory...")
+      deletedFiles foreach { fileName =>
+        val corrsep = findCorrespondingInDestDir(sourceDir, destDir, new JFile(fileName))
+        println(corrsep.getAbsolutePath)
+      }
+    }
+
+
+
+    println("\n\nPreviously:")
+    previousFileList foreach println
+
+    println("\n\nCurrently:")
+    currentFileList foreach println
+
+
+    // findCorrespondingInDestDir(sourceDir, destDir, new JFile("/Users/hmiller/Desktop/test/a/2.scala")).getAbsolutePath
+
+  }
+
+  def findCorrespondingInDestDir(sourceDir: JFile, destDir: JFile, file: JFile): JFile = {
+    val relativePath = file.getAbsolutePath.drop(sourceDir.getAbsolutePath.length + 1)
+    val destFile = new JFile(destDir, relativePath)
+    destFile
+  }
+
+  def initialize(sourceDir: JFile, dotUnisync: JFile) = {
     check(sourceDir)
     val fileList = mkFileList(sourceDir)
-    fileList foreach println
+    val writer = new PrintWriter(new FileWriter(dotUnisync))
+
+    // output file list to newly-created .unisync file
+    fileList foreach (file => writer.println(file.getAbsolutePath))
+    writer.close
   }
 
   /** Lists all the files contained in `dir` and, recursively, the children of `dir`.

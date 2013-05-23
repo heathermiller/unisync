@@ -54,7 +54,7 @@ Let's say we delete stuff in `A`, like: `2.scala` and `3.scala`. Running `uniSyn
 
 ## You want to use it?
 
-Great. All you need is Java (1.6). Just [download the three jars](https://github.com/heathermiller/unisync/blob/master/unisync.zip?raw=true), unarchive them to a nice directory somewhere that's on your path, `chmod +x` your stuff, and that's it.
+Great. All you need is Java (1.6). Just [download the bundle (an executable script & three jars)](https://github.com/heathermiller/unisync/blob/master/unisync.zip?raw=true), unarchive them to a nice directory somewhere that's on your path, `chmod +x` your stuff, and that's it.
 
 **Always call uniSync from the same directory**. Why? It writes a hidden file, called `.unisync` to the directory you called uniSync from. This file keeps track of what the state of your directory was the last time you called uniSync. It's used to figure out how your directory has changed since the last time you called uniSync (and what files you might've deleted).
 

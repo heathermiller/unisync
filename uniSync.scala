@@ -17,7 +17,7 @@ object App {
   def main(args: Array[String]): Unit = {
 
     val files = args.map(new JFile(_))
-    val currentDir = files(0)
+    val currentDir = System.getProperty("user.dir")
     val sourceDir = files(2)
     val destDir = files(3)
 
